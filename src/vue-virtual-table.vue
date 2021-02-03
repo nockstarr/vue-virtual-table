@@ -346,6 +346,7 @@
               class="item-line"
               @click="handleClickItem(props.item, $event)"
               @contextmenu="$emit('contextmenu', props.item, $event)"
+              @dblclick="$emit('dblclick', props.item, $event)"
               :class="{
                 selected: props.item._eSelected,
                 unselectable: !selectable,
