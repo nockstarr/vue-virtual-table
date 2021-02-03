@@ -151,6 +151,7 @@ Here is a complex example and you can get more info in the tables below the exam
 | --------------- | ---------- | ----------------------------- |
 | changeSelection | rows       | When the selected rows change |
 | click           | row, $event| When row is clicked           |
+| dbclick         | row, $event| When row is double clicked    |
 | contextmenu     | row, $event| When row is right-clicked     |
 
 ### Table Config
