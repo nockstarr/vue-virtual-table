@@ -344,9 +344,9 @@
           <template slot-scope="props">
             <div
               class="item-line"
-              @click="handleClickItem(props.item, $event)"
               @contextmenu="$emit('contextmenu', props.item, $event)"
               @dblclick="$emit('dblclick', props.item, $event)"
+              @click="handleClickItem(props.item, $event)"
               :class="{
                 selected: props.item._eSelected,
                 unselectable: !selectable,
@@ -698,6 +698,7 @@ export default {
   computed: {},
   data() {
     return {
+      lastSelectedEid: null,
       mainWidth: 600,
       colWidth: [],
       sortParam: { col: "", direction: "asc" },
@@ -1072,21 +1073,94 @@ export default {
       );
     },
     handleClickItem(item, event) {
+      console.log(event)
+      console.log("LIB ITEM")
+      console.log(item)
       let self = this;
       item._eSelected = !item._eSelected && this.selectable;
-      self.dataInitTemp.filter((v, i) => v._eId === item._eId)[0]._eSelected =
-        item._eSelected;
-      self.dataTemp.filter((v, i) => v._eId === item._eId)[0]._eSelected =
-        item._eSelected;
+
+      if (event.ctrlKey) {
+        console.log("lib MULTI SELECT")
+        // Multi select with ctrl+click
+        self.dataInitTemp.filter((v, i) => v._eId === item._eId)[0]._eSelected =
+            item._eSelected;
+        self.dataTemp.filter((v, i) => v._eId === item._eId)[0]._eSelected =
+            item._eSelected;
+
+      } else if (event.shiftKey){
+        console.log("SHIFT KEY clicked")
+        let selArray = self.dataInitTemp.filter(v => v._eSelected === true);
+
+        if (selArray.length > 0) {
+          this.lastSelectedEid = selArray[selArray.length -1]._eId;
+        } else {
+          this.lastSelectedEid = null;
+        }
+
+        // foundInit determines were to start marking item as selected.
+        let foundInit = !this.lastSelectedEid  // true if lastSelectedEid === null*
+
+        for (let i of self.dataInitTemp) {
+          if (i._eId === this.lastSelectedEid){
+            foundInit = true;
+          }
+          if (foundInit) { i._eSelected = true }
+          if (i._eId === item._eId) {
+            console.log("Found end. Exiting")
+            break;
+          }
+        }
+
+        // reset foundInit
+        foundInit = !this.lastSelectedEid  // true if lastSelectedEid === null*
+
+        for (let i of self.dataTemp) {
+          if (i._eId === this.lastSelectedEid){
+            foundInit = true;
+          }
+          if (foundInit) { i._eSelected = true }
+          if (i._eId === item._eId) {
+            console.log("Found end. Exiting")
+            break;
+          }
+        }
+
+      } else {
+        console.log("lib SINGLE SELECT")
+        // Single select item. Deselects all others
+
+        // Toggles selected on clicked item in dataInitTemp
+        self.dataInitTemp.filter((v, i) => v._eId === item._eId)[0]._eSelected =
+            item._eSelected;
+
+        // Toggles selected on clicked item in dataTemp
+        self.dataTemp.filter((v, i) => v._eId === item._eId)[0]._eSelected =
+            item._eSelected;
+
+        //Deselect everything else
+        self.dataInitTemp.forEach(i => {
+          if (i._eId !== item._eId) {
+            i._eSelected = false;
+          }
+        })
+        self.dataTemp.forEach(i => {
+          if (i._eId !== item._eId) {
+            i._eSelected = false;
+          }
+        })
+      } // else ENDS
+
+      // ??
       self.dataTemp.splice(0, 0);
       self.dataInitTemp.splice(0, 0);
+
       self.$emit(
         "changeSelection",
         self.dataInitTemp.filter(v => v._eSelected === true)
       );
-
       // Emit 'click' event when a row is clicked
       self.$emit("click", item, event)
+      this.lastSelectedEid = item._eId
     },
     handleClickConfirmFilter(index) {
       let self = this;
