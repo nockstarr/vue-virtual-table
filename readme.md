@@ -181,3 +181,8 @@ Here is a complex example and you can get more info in the tables below the exam
 | \_index  | Show the index of row                |
 | \_action | A slot to customize the content      |
 | \_expand | A slot to customize a popover window |
+
+### Other   
+When ``selectable`` is enabled a row can be selected by click a row.  
+``ctrl+click`` enables multiple row select  
+``shift+click`` enables mass row select  
